@@ -1131,9 +1131,8 @@ async def run_jobs():
         await asyncio.sleep(1)  # Держим цикл живым
 
 def main():
-    # Инициализация базы данных
-    init_db()
-
+    init_db()  # Инициализация базы данных
+    
     # Регистрация обработчиков
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(button))
@@ -1149,12 +1148,17 @@ def main():
     loop.run_until_complete(set_bot_commands(application.bot))
 
     # Инициализация приложения
-    application.initialize()  # Добавляем эту строку
+    application.initialize()
+
+    # Настройка вебхука
+    webhook_url = "https://tng33.onrender.com/webhook"
+    loop.run_until_complete(application.bot.setWebhook(webhook_url))
+    print(f"Webhook установлен: {webhook_url}")
 
     # Запуск job_queue в отдельном потоке
     job_thread = threading.Thread(target=lambda: asyncio.run(run_jobs()))
     job_thread.start()
 
     # Запуск Flask
-    port = int(os.getenv("PORT", 8080))  # Render использует переменную PORT
+    port = int(os.getenv("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
