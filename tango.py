@@ -1156,5 +1156,5 @@ def main():
     job_thread.start()
 
     # Запуск Flask
-    port = int(os.getenv("PORT", 10000))  # Render использует переменную PORT
+    port = int(os.getenv("PORT", 8080))  # Render использует переменную PORT
     app.run(host='0.0.0.0', port=port)
