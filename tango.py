@@ -1130,9 +1130,22 @@ async def run_jobs():
     while True:
         await asyncio.sleep(1)  # Держим цикл живым
 
+import os
+import asyncio
+import threading
+from flask import Flask, request, Response
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
+from telegram import Update, BotCommand
+
+app = Flask(__name__)
+
+# Ваши остальные импорты и функции остаются без изменений
+# ...
+
 def main():
-    init_db()  # Инициализация базы данных
-    
+    # Инициализация базы данных
+    init_db()
+
     # Регистрация обработчиков
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(button))
@@ -1143,14 +1156,14 @@ def main():
     application.add_handler(CommandHandler("endchat", endchat))
     application.add_error_handler(error_handler)
 
+    # Инициализация приложения
+    application.initialize()
+
     # Установка команд бота
     loop = asyncio.get_event_loop()
     loop.run_until_complete(set_bot_commands(application.bot))
 
-    # Инициализация приложения
-    application.initialize()
-
-    # Настройка вебхука
+    # Настройка вебхука для Telegram
     webhook_url = "https://tng33.onrender.com/webhook"
     loop.run_until_complete(application.bot.setWebhook(webhook_url))
     print(f"Webhook установлен: {webhook_url}")
@@ -1159,6 +1172,22 @@ def main():
     job_thread = threading.Thread(target=lambda: asyncio.run(run_jobs()))
     job_thread.start()
 
-    # Запуск Flask
+    # Запуск Flask-сервера
     port = int(os.getenv("PORT", 8080))
-    app.run(host='0.0.0.0', port=port)
+    print(f"Запуск Flask на порту {port}")
+    app.run(host="0.0.0.0", port=port)
+
+# Обработчик вебхуков
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    update = Update.de_json(request.get_json(force=True), application.bot)
+    asyncio.ensure_future(application.process_update(update))  # Используем существующий цикл
+    return Response(status=200)
+
+# Эндпоинт для пинга
+@app.route('/ping')
+def ping():
+    return "Bot is alive!"
+
+if __name__ == "__main__":
+    main()
