@@ -1148,6 +1148,9 @@ def main():
     loop = asyncio.get_event_loop()
     loop.run_until_complete(set_bot_commands(application.bot))
 
+    # Инициализация приложения
+    application.initialize()  # Добавляем эту строку
+
     # Запуск job_queue в отдельном потоке
     job_thread = threading.Thread(target=lambda: asyncio.run(run_jobs()))
     job_thread.start()
@@ -1155,6 +1158,3 @@ def main():
     # Запуск Flask
     port = int(os.getenv("PORT", 8080))  # Render использует переменную PORT
     app.run(host='0.0.0.0', port=port)
-
-if __name__ == "__main__":
-    main()
