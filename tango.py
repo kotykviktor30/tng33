@@ -1113,9 +1113,9 @@ async def set_bot_commands(bot):
 
 # Webhook-обработчик для Telegram
 @app.route('/webhook', methods=['POST'])
-async def webhook():
+def webhook():
     update = Update.de_json(request.get_json(force=True), application.bot)
-    await application.process_update(update)
+    application.process_update(update)  # Убираем await
     return Response(status=200)
 
 # Эндпоинт для пинга (чтобы Render не засыпал)
