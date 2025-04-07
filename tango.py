@@ -1114,7 +1114,7 @@ async def set_bot_commands(bot):
 @app.route('/webhook', methods=['POST'])
 def webhook():
     update = Update.de_json(request.get_json(force=True), application.bot)
-    asyncio.run(application.process_update(update))  # Используем asyncio.run для выполнения корутины
+    asyncio.ensure_future(application.process_update(update))  # Schedule on existing loop
     return Response(status=200)
 
 # Эндпоинт для пинга (чтобы Render не засыпал)
